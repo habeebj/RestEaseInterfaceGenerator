@@ -1,5 +1,5 @@
 # OpenApiParser
-Converts open api specification to code (using `CSharpCodeWriter`)
+Converts OpenAPI Specification to code ( `CSharpCodeWriter`)
 
 ## Usage
 ```bash
