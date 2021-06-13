@@ -1,5 +1,5 @@
 # OpenApiParser
-Converts OpenAPI Specification to code ( `CSharpCodeWriter`)
+Generates RestEase Interface from OpenAPI Specification
 
 ## Usage
 ```bash
