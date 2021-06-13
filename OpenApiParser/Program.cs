@@ -13,26 +13,27 @@ namespace OpenApiParser
     {
         static async Task Main(string[] args)
         {
-            // get arguments from args
+            var argsParser = new ArgsParser<Options>(args);
+
+            #region Sample swagger json
+
+            // "https://localhost:5001";
+            // "https://petstore.swagger.io/v2/swagger.json";
+            // "https://staging.naijavax.com/swagger/v1/swagger.json";
+
+            #endregion
+
             try
             {
-                // Options
-                var url = "https://localhost:5001";
-                // url = "https://petstore.swagger.io/v2/swagger.json";
-                url = "https://staging.naijavax.com/swagger/v1/swagger.json";
-                url = url.EndsWith(".json") ? url : $"{url}/swagger/v1/swagger.json";
-
-                var openApiParser = new OpenApiParser(url);
-
+                var openApiParser = new OpenApiParser(argsParser.Options);
                 var csharpWriter = new CSharpCodeWriter();
                 openApiParser.AddCodeBuilder(new InterfaceBuilder(csharpWriter));
                 openApiParser.AddCodeBuilder(new ClassBuilder(csharpWriter));
 
-                var path = Path.Combine(Directory.GetCurrentDirectory(), $"{Config.ServiceName()}Service.cs");
-                var fileWriter = new FileWriter(path);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), argsParser.Options.Output);
+                var filename = $"{Config.ServiceName()}Service.cs";
+                var fileWriter = new FileWriter(path, filename);
                 await openApiParser.GenerateAndSaveOutputAsync(fileWriter);
-
-                Console.WriteLine($"File Created: {path}");
             }
             catch (HttpRequestException ex)
             {
@@ -46,7 +47,5 @@ namespace OpenApiParser
                 Console.WriteLine(e.Message);
             }
         }
-
-        
     }
 }

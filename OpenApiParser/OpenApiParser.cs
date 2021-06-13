@@ -18,9 +18,12 @@ namespace OpenApiParser
         private readonly IList<ICodeBuilder> _codeBuilders = new List<ICodeBuilder>();
 
         // options
-        public OpenApiParser(string url)
+        public OpenApiParser(Options options)
         {
             _httpClient = new HttpClient();
+            if (string.IsNullOrEmpty(options?.Url))
+                return;
+            var url = options.Url.EndsWith(".json") ? options.Url : $"{options.Url}/swagger/v1/swagger.json";
             _jObject = GetJObjectFromUrlAsync(url).GetAwaiter().GetResult();
         }
 
@@ -31,8 +34,14 @@ namespace OpenApiParser
 
         public async Task GenerateAndSaveOutputAsync(IOutputWriter outputWriter)
         {
-            var content = GenerateOutput();
-            await outputWriter.SaveAsync(content);
+            if (_jObject != null)
+            {
+                Console.WriteLine("Starting...");
+                var content = GenerateOutput();
+                await outputWriter.SaveAsync(content);
+            }
+
+            await Task.CompletedTask;
         }
 
         private async Task<JObject> GetJObjectFromUrlAsync(string url)
@@ -45,6 +54,7 @@ namespace OpenApiParser
             var json = await response.Content.ReadAsStringAsync();
             return GetJObject(json);
         }
+
         private string GenerateOutput()
         {
             var content = GetStringOutputFromJObject(_jObject);
@@ -67,7 +77,7 @@ namespace OpenApiParser
                     jObject.TryGetValue("openapi", out version);
 
                 Config.Version = version?.ToString();
-                
+
                 jObject.TryGetValue("basePath", out var basPath);
                 Config.BasePath = basPath?.ToString();
 
